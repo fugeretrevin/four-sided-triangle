@@ -1,8 +1,7 @@
 #root {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
-  text-align: center;
+  /* Remove Vite default constraints so full-bleed layouts work correctly */
+  width: 100%;
+  min-height: 100vh;
 }
 
 .logo {

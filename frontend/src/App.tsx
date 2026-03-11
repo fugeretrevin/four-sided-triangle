@@ -1,23 +1,76 @@
-import { useState } from 'react'
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
 
+import { AuthProvider } from './contexts/AuthContext'
+import { ProtectedRoute } from './components/ProtectedRoute'
+
 import LoginPage from './components/LoginPage'
-import './App.css'
 import SignupPage from './components/SignupPage'
-import CreateEvent from './components/CreateEvent'
 import Dashboard from './components/Dashboard'
 
-function App() {
+import AdminLoginPage from './components/admin/AdminLoginPage'
+import AdminLayout from './components/admin/AdminLayout'
+import AdminDashboard from './components/admin/AdminDashboard'
+import EventForm from './components/admin/EventForm'
 
+import './App.css'
+
+function App() {
   return (
-    <Router>
-      <Routes>
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/signup" element={<SignupPage />} />
-        <Route path="/dashboard" element={<Dashboard />} /> {/* Placeholder for now */}
-        <Route path="/create-event" element={<CreateEvent />} />
-      </Routes>
-    </Router>
+    <AuthProvider>
+      <Router>
+        <Routes>
+          {/* ── Public routes ─────────────────────────────────── */}
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/signup" element={<SignupPage />} />
+
+          {/* ── Authenticated user routes ──────────────────────── */}
+          <Route
+            path="/dashboard"
+            element={
+              <ProtectedRoute>
+                <Dashboard />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* ── Admin routes ───────────────────────────────────── */}
+          <Route path="/admin/login" element={<AdminLoginPage />} />
+          <Route
+            path="/admin/dashboard"
+            element={
+              <ProtectedRoute requiredRole="admin" redirectTo="/admin/login">
+                <AdminLayout>
+                  <AdminDashboard />
+                </AdminLayout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/events/new"
+            element={
+              <ProtectedRoute requiredRole="admin" redirectTo="/admin/login">
+                <AdminLayout>
+                  <EventForm />
+                </AdminLayout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/events/:id/edit"
+            element={
+              <ProtectedRoute requiredRole="admin" redirectTo="/admin/login">
+                <AdminLayout>
+                  <EventForm />
+                </AdminLayout>
+              </ProtectedRoute>
+            }
+          />
+
+          {/* ── Fallback ───────────────────────────────────────── */}
+          <Route path="/" element={<Navigate to="/login" replace />} />
+        </Routes>
+      </Router>
+    </AuthProvider>
   )
 }
 

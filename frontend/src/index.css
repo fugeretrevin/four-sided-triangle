@@ -2,6 +2,15 @@
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 
+/* Ensure html, body, and React root fill the full viewport with no white edges */
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {

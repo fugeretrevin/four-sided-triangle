@@ -10,6 +10,9 @@ build/
 .env.local
 .env.*.local
 
+# Firebase credentials
+frontend/src/firebaseConfig.ts
+
 # IDE
 .vscode/
 .idea/

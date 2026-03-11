@@ -11,4 +11,10 @@ export default defineConfig({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  server: {
+    headers: {
+      // Allow Firebase Auth popups to close themselves without COOP blocking
+      "Cross-Origin-Opener-Policy": "same-origin-allow-popups",
+    },
+  },
 })
