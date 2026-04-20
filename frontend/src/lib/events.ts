@@ -80,6 +80,17 @@ export async function getEvents(status?: EventStatus): Promise<Event[]> {
   return snap.docs.map((d) => ({ id: d.id, ...d.data() } as Event))
 }
 
+/** Fetch events created by a specific host, ordered by dateTime asc. */
+export async function getEventsByHost(hostId: string): Promise<Event[]> {
+  const q = query(
+    collection(db, EVENTS_COL),
+    where("hostId", "==", hostId),
+    orderBy("dateTime", "asc")
+  )
+  const snap = await getDocs(q)
+  return snap.docs.map((d) => ({ id: d.id, ...d.data() } as Event))
+}
+
 /** Fetch a single event by Firestore document id. Returns null if not found. */
 export async function getEvent(id: string): Promise<Event | null> {
   const snap = await getDoc(doc(db, EVENTS_COL, id))

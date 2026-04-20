@@ -1,7 +1,6 @@
 import {
   collection,
   doc,
-  getDoc,
   setDoc,
   deleteDoc,
   getDocs,
@@ -10,6 +9,7 @@ import {
   serverTimestamp,
   updateDoc,
   increment,
+  runTransaction,
   type Timestamp,
 } from "firebase/firestore"
 import { db } from "@/firebaseConfig"
@@ -26,38 +26,39 @@ function rsvpDocId(eventId: string, userId: string): string {
   return `${eventId}_${userId}`
 }
 
-/** Check whether a user has already RSVPed to an event. */
-export async function hasRsvped(eventId: string, userId: string): Promise<boolean> {
-  const snap = await getDoc(doc(db, RSVPS_COL, rsvpDocId(eventId, userId)))
-  return snap.exists()
-}
-
 /**
  * RSVP a user to an event.
- * Creates the rsvp document and atomically increments rsvpCount on the event.
- * No-ops if the user has already RSVPed.
+ * Creates the rsvp document and increments rsvpCount on the event.
+ * Uses a transaction to ensure the count stays accurate.
  */
 export async function rsvpToEvent(eventId: string, userId: string): Promise<void> {
   const rsvpRef = doc(db, RSVPS_COL, rsvpDocId(eventId, userId))
-  const snap = await getDoc(rsvpRef)
-  if (snap.exists()) return // already RSVPed — idempotent
+  const eventRef = doc(db, "events", eventId)
 
-  await setDoc(rsvpRef, { eventId, userId, createdAt: serverTimestamp() })
-  await updateDoc(doc(db, "events", eventId), { rsvpCount: increment(1) })
+  await runTransaction(db, async (tx) => {
+    const rsvpSnap = await tx.get(rsvpRef)
+    if (rsvpSnap.exists()) return // already RSVPed — idempotent
+
+    tx.set(rsvpRef, { eventId, userId, createdAt: serverTimestamp() })
+    tx.update(eventRef, { rsvpCount: increment(1) })
+  })
 }
 
 /**
  * Cancel a user's RSVP.
- * Deletes the rsvp document and atomically decrements rsvpCount on the event.
- * No-ops if the user hasn't RSVPed.
+ * Deletes the rsvp document and decrements rsvpCount on the event.
  */
 export async function cancelRsvp(eventId: string, userId: string): Promise<void> {
   const rsvpRef = doc(db, RSVPS_COL, rsvpDocId(eventId, userId))
-  const snap = await getDoc(rsvpRef)
-  if (!snap.exists()) return // not RSVPed — idempotent
+  const eventRef = doc(db, "events", eventId)
 
-  await deleteDoc(rsvpRef)
-  await updateDoc(doc(db, "events", eventId), { rsvpCount: increment(-1) })
+  await runTransaction(db, async (tx) => {
+    const rsvpSnap = await tx.get(rsvpRef)
+    if (!rsvpSnap.exists()) return // not RSVPed — idempotent
+
+    tx.delete(rsvpRef)
+    tx.update(eventRef, { rsvpCount: increment(-1) })
+  })
 }
 
 /** Return all event IDs the user has RSVPed to. */

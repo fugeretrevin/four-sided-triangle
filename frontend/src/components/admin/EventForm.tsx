@@ -30,6 +30,7 @@ import {
   type EventStatus,
 } from "@/lib/events"
 import { useAuth } from "@/contexts/AuthContext"
+import { isAdminRole } from "@/lib/users"
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -51,7 +52,8 @@ export default function EventForm() {
   const { id } = useParams<{ id?: string }>()
   const isEdit = Boolean(id)
   const navigate = useNavigate()
-  const { user } = useAuth()
+  const { user, role } = useAuth()
+  const isSuperadmin = role === "superadmin"
 
   // Form state
   const [title, setTitle] = useState("")
@@ -77,6 +79,11 @@ export default function EventForm() {
         const event = await getEvent(id)
         if (!event) {
           setError("Event not found.")
+          return
+        }
+        // Club leaders can only edit their own events
+        if (!isSuperadmin && event.hostId !== user?.uid) {
+          setError("You don't have permission to edit this event.")
           return
         }
         setTitle(event.title)

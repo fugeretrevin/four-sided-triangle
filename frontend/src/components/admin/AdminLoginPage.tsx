@@ -6,7 +6,7 @@ import {
   GoogleAuthProvider,
 } from "firebase/auth"
 import { FirebaseError } from "firebase/app"
-import { GalleryVerticalEnd } from "lucide-react"
+import logo from "@/assets/logo_v1.png"
 import { Button } from "@/components/ui/button"
 import {
   Card,
@@ -24,7 +24,7 @@ import {
 } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 import { auth } from "@/firebaseConfig"
-import { ensureUserDoc } from "@/lib/users"
+import { ensureUserDoc, isAdminRole } from "@/lib/users"
 
 const googleProvider = new GoogleAuthProvider()
 
@@ -36,10 +36,10 @@ export default function AdminLoginPage() {
   const [googleLoading, setGoogleLoading] = useState(false)
   const navigate = useNavigate()
 
-  /** Verify the signed-in user has admin role; redirect or show error. */
+  /** Verify the signed-in user has an admin-level role; redirect or show error. */
   const authorizeAdmin = async () => {
     const role = await ensureUserDoc(auth.currentUser!)
-    if (role === "admin") {
+    if (isAdminRole(role)) {
       navigate("/admin/dashboard")
     } else {
       await auth.signOut()
@@ -98,9 +98,7 @@ export default function AdminLoginPage() {
       <div className="flex w-full max-w-sm flex-col gap-6">
         {/* Branding */}
         <div className="flex items-center gap-2 self-center font-medium">
-          <div className="flex size-6 items-center justify-center rounded-md bg-primary text-primary-foreground">
-            <GalleryVerticalEnd className="size-4" />
-          </div>
+          <img src={logo} alt="Connect Four" className="h-10 w-10 rounded-md object-cover" />
           Four Sided Triangle
         </div>
 

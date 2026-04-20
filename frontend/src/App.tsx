@@ -5,12 +5,15 @@ import { ProtectedRoute } from './components/ProtectedRoute'
 
 import LoginPage from './components/LoginPage'
 import SignupPage from './components/SignupPage'
+import OnboardingPage from './components/OnboardingPage'
 import Dashboard from './components/Dashboard'
 
 import AdminLoginPage from './components/admin/AdminLoginPage'
 import AdminLayout from './components/admin/AdminLayout'
 import AdminDashboard from './components/admin/AdminDashboard'
 import EventForm from './components/admin/EventForm'
+
+import EventScreen from './components/EventDisplay';
 
 import './App.css'
 
@@ -22,6 +25,16 @@ function App() {
           {/* ── Public routes ─────────────────────────────────── */}
           <Route path="/login" element={<LoginPage />} />
           <Route path="/signup" element={<SignupPage />} />
+
+          {/* ── Onboarding ────────────────────────────────────── */}
+          <Route
+            path="/onboarding"
+            element={
+              <ProtectedRoute skipOnboardingCheck>
+                <OnboardingPage />
+              </ProtectedRoute>
+            }
+          />
 
           {/* ── Authenticated user routes ──────────────────────── */}
           <Route
@@ -65,6 +78,10 @@ function App() {
               </ProtectedRoute>
             }
           />
+          <Route 
+            path="/event" 
+            element={
+            <EventScreen />} />
 
           {/* ── Fallback ───────────────────────────────────────── */}
           <Route path="/" element={<Navigate to="/login" replace />} />
