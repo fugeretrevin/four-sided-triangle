@@ -4,7 +4,7 @@
 
 /* Ensure html, body, and React root fill the full viewport with no white edges */
 html,
-body,
+body, 
 #root {
   height: 100%;
   margin: 0;

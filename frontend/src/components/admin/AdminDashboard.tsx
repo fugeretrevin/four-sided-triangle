@@ -28,12 +28,14 @@ import {
 } from "@/components/ui/dialog"
 import {
   getEvents,
+  getEventsByHost,
   deleteEvent,
   cancelEvent,
   updateEvent,
   type Event,
   type EventStatus,
 } from "@/lib/events"
+import { useAuth } from "@/contexts/AuthContext"
 
 // ── Status badge ─────────────────────────────────────────────────────────────
 
@@ -58,6 +60,9 @@ type FilterTab = "all" | EventStatus
 
 export default function AdminDashboard() {
   const navigate = useNavigate()
+  const { user, role } = useAuth()
+  const isSuperadmin = role === "superadmin"
+
   const [events, setEvents] = useState<Event[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -71,7 +76,10 @@ export default function AdminDashboard() {
     setLoading(true)
     setError(null)
     try {
-      const data = await getEvents()
+      // Superadmins see all events; club leaders see only their own
+      const data = isSuperadmin
+        ? await getEvents()
+        : await getEventsByHost(user!.uid)
       setEvents(data)
     } catch {
       setError("Failed to load events. Check your connection and try again.")
@@ -134,7 +142,9 @@ export default function AdminDashboard() {
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">Events</h1>
           <p className="text-sm text-muted-foreground">
-            Manage all events on the platform
+            {isSuperadmin
+              ? "Manage all events on the platform"
+              : "Manage your events"}
           </p>
         </div>
         <div className="flex items-center gap-2">

@@ -1,5 +1,6 @@
 import { Link, useLocation, useNavigate } from "react-router-dom"
-import { CalendarDays, LayoutDashboard, LogOut, ShieldCheck } from "lucide-react"
+import { CalendarDays, LayoutDashboard, LogOut } from "lucide-react"
+import logo from "@/assets/logo_v1.png"
 import { auth } from "@/firebaseConfig"
 import { useAuth } from "@/contexts/AuthContext"
 import { Separator } from "@/components/ui/separator"
@@ -19,7 +20,7 @@ interface AdminLayoutProps {
 }
 
 export default function AdminLayout({ children }: AdminLayoutProps) {
-  const { user } = useAuth()
+  const { user, role } = useAuth()
   const location = useLocation()
   const navigate = useNavigate()
 
@@ -34,11 +35,9 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
       <aside className="flex w-60 shrink-0 flex-col border-r bg-card">
         {/* Logo */}
         <div className="flex h-14 items-center gap-2 border-b px-4">
-          <div className="flex size-6 items-center justify-center rounded-md bg-primary text-primary-foreground">
-            <ShieldCheck className="size-3.5" />
-          </div>
+          <img src={logo} alt="Connect Four" className="h-10 w-10 rounded-md object-cover" />
           <span className="text-sm font-semibold tracking-tight">
-            Admin Portal
+            {role === "superadmin" ? "Admin Portal" : "Club Portal"}
           </span>
         </div>
 
